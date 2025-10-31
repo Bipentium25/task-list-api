@@ -9,21 +9,17 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 @tasks_bp.post("")
 def create_task():
     request_body = request.get_json()
-    title = request_body["title"]
-    description = request_body["description"]
-    completed_at = request_body["is_complete"]
+    try: 
+        new_task = Task.from_dict(request_body)
+    except KeyError as error:
+        response = {"details": "Invalid data"}
+        abort(make_response(response, 400))
 
-    new_task = Task(title=title, description=description,completed_at=completed_at)
     db.session.add(new_task)
     db.session.commit()
 
-    response = {
-        "id": new_task.id,
-        "title": new_task.title,
-        "description": new_task.description,
-        "is_complete":new_task.completed_at
-    }
-    return response, 201
+    return new_task.to_dict(), 201
+
 
 @tasks_bp.get("")
 def get_all_tasks():
@@ -33,12 +29,49 @@ def get_all_tasks():
 
     tasks_response = []
     for task in tasks:
-        tasks_response.append(
-            {
-                "id": task.id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete":task.completed_at
-            }
-        )
+        tasks_response.append(task.to_dict())
     return tasks_response
+
+@tasks_bp.get("/<task_id>")
+def get_one_task(task_id):
+    task = validate_task(Task, task_id)
+    return task.to_dict()
+
+@tasks_bp.put("/<task_id>")
+def update_task(task_id):
+    task = validate_task(Task,task_id)
+    request_body = request.get_json()
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
+
+@tasks_bp.delete("/<task_id>")
+def delete_book(task_id):
+    task = validate_task(Task,task_id)
+    db.session.delete(task)
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
+
+
+
+
+def validate_task(cls, task_id):
+    try:
+        task_id = int(task_id)
+    except:
+        response = {"message": f"{cls.__name__} {task_id} invalid"}
+        abort(make_response(response , 400))
+
+    query = db.select(cls).where(cls.id == task_id)
+    model = db.session.scalar(query)
+    
+    if not model:
+        response = {"message": f"{cls.__name__} {task_id} not found"}
+        abort(make_response(response, 404))
+    
+    return model
+
