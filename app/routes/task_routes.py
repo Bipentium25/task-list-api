@@ -4,6 +4,8 @@ from app.models.task import Task
 from ..db import db
 from sqlalchemy import desc
 from datetime import datetime
+import os
+import requests
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -68,8 +70,18 @@ def delete_book(task_id):
 def mark_task(task_id):
     task = validate_task(Task,task_id)
     task.completed_at = datetime.now()
+    message_slack(task)
     db.session.commit()
     return Response(status=204, mimetype="application/json")
+
+
+def message_slack(task):
+    slack_token = os.environ.get("SLACK_BOT_TOKEN")
+    body = {'token': slack_token, 'channel': '#task-notifications', 'text':f'Someone just completed the task {task.title}'}
+    headers = {'Authorization': slack_token}
+    response = requests.post("https://slack.com/api/chat.postMessage", data=body,headers=headers)
+    print(f"Status Code: {response.status_code}")
+    print(f"Response JSON: {response.json()}")
 
 
 @tasks_bp.patch("/<task_id>/mark_incomplete")
