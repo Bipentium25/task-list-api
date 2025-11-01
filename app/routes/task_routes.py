@@ -3,6 +3,7 @@ from flask import Blueprint, abort, make_response, request, Response
 from app.models.task import Task
 from ..db import db
 from sqlalchemy import desc
+from datetime import datetime
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -63,8 +64,20 @@ def delete_book(task_id):
 
     return Response(status=204, mimetype="application/json")
 
+@tasks_bp.patch("/<task_id>/mark_complete")
+def mark_task(task_id):
+    task = validate_task(Task,task_id)
+    task.completed_at = datetime.now()
+    db.session.commit()
+    return Response(status=204, mimetype="application/json")
 
 
+@tasks_bp.patch("/<task_id>/mark_incomplete")
+def unmark_task(task_id):
+    task = validate_task(Task,task_id)
+    task.completed_at = None
+    db.session.commit()
+    return Response(status=204, mimetype="application/json")
 
 def validate_task(cls, task_id):
     try:
