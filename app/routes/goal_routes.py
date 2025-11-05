@@ -3,6 +3,8 @@ from app.models.goal import Goal
 from ..db import db
 import os
 import requests
+from app.routes.route_utilities import validate_model
+from ..models.task import Task
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -76,3 +78,38 @@ def validate_goal(cls, goal_id):
     
     return model
 
+@goals_bp.post("/<goal_id>/tasks")
+def create_task_with_goal(goal_id):
+    goal = validate_model(Goal, goal_id)
+
+    #clear
+    goal.tasks.clear()
+
+    request_body = request.get_json()
+    new_tasks_ids= request_body["task_ids"]
+
+    for new_id in new_tasks_ids:
+        task = validate_model(Task,new_id)
+        goal.tasks.append(task)
+
+    db.session.commit()
+    response_body = {
+        "id":int(goal_id),
+        "task_ids": [task.id for task in goal.tasks]
+    }
+    return make_response(response_body,200)
+
+
+@goals_bp.get("/<goal_id>/tasks")
+def get_all_task_with_goal(goal_id):
+
+    goal = validate_model(Goal, goal_id)
+
+    task_list = []
+    for task in goal.tasks:
+        each_task_info = task.to_dict()
+        task_list.append(each_task_info)
+    
+    response = goal.to_dict()
+    response["tasks"] = task_list
+    return make_response(response,200)
