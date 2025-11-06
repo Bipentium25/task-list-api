@@ -1,12 +1,12 @@
 
-from flask import Blueprint, abort, make_response, request, Response
+from flask import Blueprint, request, Response
 from app.models.task import Task
 from ..db import db
 from sqlalchemy import desc
 from datetime import datetime
 import os
 import requests
-from app.routes.route_utilities import validate_model
+from app.routes.route_utilities import validate_model, create_model
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -14,17 +14,7 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 @tasks_bp.post("")
 def create_task():
     request_body = request.get_json()
-    try: 
-        new_task = Task.from_dict(request_body)
-    except KeyError as error:
-        response = {"details": "Invalid data"}
-        abort(make_response(response, 400))
-
-    db.session.add(new_task)
-    db.session.commit()
-
-    return new_task.to_dict(), 201
-
+    return create_model(Task, request_body)
 
 @tasks_bp.get("")
 def get_all_tasks():
