@@ -8,15 +8,15 @@ import os
 import requests
 from app.routes.route_utilities import validate_model, create_model
 
-tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 
-@tasks_bp.post("")
+@bp.post("")
 def create_task():
     request_body = request.get_json()
     return create_model(Task, request_body)
 
-@tasks_bp.get("")
+@bp.get("")
 def get_all_tasks():
     query = db.select(Task).order_by(Task.id)
     title_param = request.args.get("sort")
@@ -33,12 +33,12 @@ def get_all_tasks():
         tasks_response.append(task.to_dict())
     return tasks_response
 
-@tasks_bp.get("/<task_id>")
+@bp.get("/<task_id>")
 def get_one_task(task_id):
     task = validate_model(Task, task_id)
     return task.to_dict()
 
-@tasks_bp.put("/<task_id>")
+@bp.put("/<task_id>")
 def update_task(task_id):
     task = validate_model(Task,task_id)
     request_body = request.get_json()
@@ -49,7 +49,7 @@ def update_task(task_id):
 
     return Response(status=204, mimetype="application/json")
 
-@tasks_bp.delete("/<task_id>")
+@bp.delete("/<task_id>")
 def delete_task(task_id):
     task = validate_model(Task,task_id)
     db.session.delete(task)
@@ -57,7 +57,7 @@ def delete_task(task_id):
 
     return Response(status=204, mimetype="application/json")
 
-@tasks_bp.patch("/<task_id>/mark_complete")
+@bp.patch("/<task_id>/mark_complete")
 def mark_task(task_id):
     task = validate_model(Task,task_id)
     task.completed_at = datetime.now()
@@ -75,7 +75,7 @@ def message_slack(task):
     print(f"Response JSON: {response.json()}")
 
 
-@tasks_bp.patch("/<task_id>/mark_incomplete")
+@bp.patch("/<task_id>/mark_incomplete")
 def unmark_task(task_id):
     task = validate_model(Task,task_id)
     task.completed_at = None
