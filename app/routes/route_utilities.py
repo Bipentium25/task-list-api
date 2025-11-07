@@ -24,7 +24,7 @@ def create_model(cls, model_data):
     except KeyError as error:
         response = {"details": "Invalid data"}
         abort(make_response(response, 400))
-    
+
     db.session.add(new_model)
     db.session.commit()
 
