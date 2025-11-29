@@ -72,9 +72,8 @@ def message_slack(task):
     slack_token = os.environ.get("SLACK_BOT_TOKEN")
     body = {'token': slack_token, 'channel': '#task-notifications', 'text':f'Someone just completed the task {task.title}'}
     headers = {'Authorization': slack_token}
-    response = requests.post("https://slack.com/api/chat.postMessage", data=body,headers=headers)
-    print(f"Status Code: {response.status_code}")
-    print(f"Response JSON: {response.json()}")
+    
+    response = requests.post("https://slack.com/api/chat.postMessage", data=body, headers=headers)
 
 
 @bp.patch("/<task_id>/mark_incomplete")
