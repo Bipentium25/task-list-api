@@ -80,7 +80,9 @@ def message_slack(task):
 def unmark_task(task_id):
     task = validate_model(Task,task_id)
     task.completed_at = None
+    
     db.session.commit()
+    
     return Response(status=204, mimetype="application/json")
 
 
