@@ -56,7 +56,7 @@ def create_task_with_goal(goal_id):
     goal.tasks.clear()
 
     request_body = request.get_json()
-    new_tasks_ids= request_body["task_ids"]
+    new_tasks_ids = request_body["task_ids"]
 
     for new_id in new_tasks_ids:
         task = validate_model(Task,new_id)
