@@ -82,4 +82,5 @@ def get_all_task_with_goal(goal_id):
     
     response = goal.to_dict()
     response["tasks"] = task_list
+
     return make_response(response,200)
