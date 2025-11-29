@@ -35,6 +35,7 @@ class Task(db.Model):
         new_task = cls(title=task_data["title"],
         description= task_data["description"],
         completed_at = None if not task_data.get("is_complete") else task_data.get("is_complete"))
+        
         return new_task
         
 
