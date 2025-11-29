@@ -63,10 +63,12 @@ def create_task_with_goal(goal_id):
         goal.tasks.append(task)
 
     db.session.commit()
+    
     response_body = {
         "id":int(goal_id),
         "task_ids": [task.id for task in goal.tasks]
     }
+    
     return make_response(response_body,200)
 
 
