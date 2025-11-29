@@ -36,7 +36,6 @@ def update_goal(goal_id):
     goal.title = request_body["title"]
     db.session.commit()
 
-
     return Response(status=204, mimetype="application/json")
 
 @bp.delete("/<goal_id>")
