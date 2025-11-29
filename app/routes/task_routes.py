@@ -61,8 +61,10 @@ def delete_task(task_id):
 def mark_task(task_id):
     task = validate_model(Task,task_id)
     task.completed_at = datetime.now()
-    message_slack(task)
+    
     db.session.commit()
+    message_slack(task)
+    
     return Response(status=204, mimetype="application/json")
 
 
